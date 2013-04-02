@@ -1,0 +1,78 @@
+<?php
+/**
+* For example to be used with rcswitch-pi (https://github.com/r10r/rcswitch-pi)
+* and Power Outlets (https://itunes.apple.com/app/power-outlets-power-control/id447756862)
+*/
+class Tgi {
+
+  /**
+  * Temporary states
+  * @var array
+  */
+  private $_states = array(0, 0, 0, 0);
+
+  /**
+  * Commandline to fire when triggered
+  * Make sure that the hardware code is correctly set.
+  * @var string
+  */
+  private $_rcCommand = 'sudo /home/pi/rcswitch-pi/send 10110 %d %d >> /dev/null';
+
+  /**
+  * Simple check of parameters
+  * @return string
+  */
+  public function execute() {
+    $result = '';
+    switch (@$_GET['p']) {
+      case 'l':
+        $result .= implode(' ', $this->_states);
+        break;
+      case '0uuu':
+        $this->_toggle(0);
+        $result .= implode(' ', $this->_states);
+        break;        
+      case 'u0uu':
+        $this->_toggle(1);
+        $result .= implode(' ', $this->_states);
+        break;        
+      case 'uu0u':
+        $this->_toggle(2);
+        $result .= implode(' ', $this->_states);
+        break;        
+      case 'uuu0':
+        $this->_toggle(3);
+        $result .= implode(' ', $this->_states);
+        break;        
+      case '1uuu':
+        $this->_toggle(0, TRUE);
+        $result .= implode(' ', $this->_states);
+        break;        
+      case 'u1uu':
+        $this->_toggle(1, TRUE);
+        $result .= implode(' ', $this->_states);
+        break;        
+      case 'uu1u':
+        $this->_toggle(2, TRUE);
+        $result .= implode(' ', $this->_states);
+        break;        
+      case 'uuu1':
+        $this->_toggle(3, TRUE);
+        $result .= implode(' ', $this->_states);
+        break;        
+    }
+    echo sprintf('<html>%s</html>', $result);
+  }
+
+  /**
+  * Perform command line execution
+  */
+  private function _toggle($num, $status = FALSE) {
+    $cmd = sprintf($this->_rcCommand, $num+1, (int)$status);    
+    exec($cmd);
+    $this->_states[$num] = (int)$status;
+  }
+}
+
+$tgi = new Tgi();
+$tgi->execute();
